@@ -5,7 +5,9 @@ import Prelude hiding (even,const)
 
 -- data Stream t = t : Stream t
 
-pre v (x:xs) = x : pre x xs
+-- Co-iteration
+
+pre v (x:xs) = v : pre x xs
 
 plus (x:xs) (y:ys) = x + y : plus xs ys
 
@@ -51,6 +53,8 @@ co_pre1 v (Co tx sx) =
                  in (v, (s', sx'))
      ) (v,sx)
 
+-- Length-preserving functions
+
 const v = v : const v
 
 data State s = Nil | St s
@@ -67,7 +71,9 @@ co_extend (Co f i) (Co e ie) =
                   in ((vf ve), (sf',se'))
      ) (i,ie)
 
-co_plus1 x y = extend (extend (const (+)) x) y
+-- In the paper this function is written in terms of streams, which seems
+-- to be wrong
+co_plus1 x y = co_extend (co_extend (co_const (+)) x) y
 
 (x:xs) `fby` ys = x : ys
 
@@ -119,6 +125,8 @@ co_product (Co e1 i1) (Co e2 i2) =
                       (v2,s2') = e2 s2
                   in  ((v1,v2), (s1',s2'))
      ) (i1, i2)
+
+-- Non length-preserving stream functions
 
 (x:xs) `when` (True :cs) = x : xs `when` cs
 (x:xs) `when` (False:cs) = xs `when` cs
